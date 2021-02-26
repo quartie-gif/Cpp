@@ -16,10 +16,7 @@ Frac::Frac(int n, int d): _n(n), _d(d)
 
 Frac::Frac(double d)
 {
-    if(d == 0)
-    {
-        return;
-    }
+    
     int counter = 0;
     double prec = d;
     while(fmod(prec,10) != 0 and prec != Frac::Prec)
