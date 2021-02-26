@@ -24,6 +24,7 @@ Frac::Frac(double d)
         prec *= 10;
         counter ++;
     }
+    if (pow(10,counter) == 0) return ;
     _d = pow(10,counter);
     _n = d * pow(10,counter);
 
