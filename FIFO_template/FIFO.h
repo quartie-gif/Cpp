@@ -25,7 +25,14 @@ private:
 template<typename T>
 FIFO<T>::~FIFO()
 {
-
+	Node<T> * current = m_head;
+	while(current)
+	{
+		Node<T> * next = current -> m_next;
+		delete current;
+		current = next;
+	}
+	m_head = m_tail = nullptr;
 }
 
 template<typename T>
