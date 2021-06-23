@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/include -Wall -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk -Wall -std=gnu++17 -o CMakeFiles/Lab12.dir/main.cpp.o -c /Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/main.cpp",
+  "file": "/Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/main.cpp"
+},
+{
+  "directory": "/Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/include -Wall -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk -Wall -std=gnu++17 -o CMakeFiles/Lab12.dir/src/PairOfNumbers.cpp.o -c /Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/src/PairOfNumbers.cpp",
+  "file": "/Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/src/PairOfNumbers.cpp"
+}
+]

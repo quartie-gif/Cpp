@@ -1,0 +1,3 @@
+/Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/build/CMakeFiles/rebuild_cache.dir
+/Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/build/CMakeFiles/edit_cache.dir
+/Users/apple/Desktop/STUDIA/IV.SEM/PO/Sikora/Lab11/build/CMakeFiles/Lab12.dir
