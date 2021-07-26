@@ -34,11 +34,11 @@
 
 #include <iostream>
 
-class  Baza1 									{ public: ~Baza1() {std::cout << "Baza1 " ;}};
-class  Baza2 									{ public: ~Baza2() {std::cout << "Baza2 " ;}};
-class  Baza3 									{ public: ~Baza3() {std::cout << "Baza3 " ;}};
-class X: public Baza1, public Baza2 			{ public: ~X() {std::cout << "X " ;}};
-class Y: private Baza3, public X, public Baza1 	{ public: ~Y() {std::cout << "Y " ;}};
+class  Baza1 									{ public: ~Baza1() {std::cout << "Baza1 " ;}; Baza1() {std::cout << "Baza1 " ;}};
+class  Baza2 									{ public: ~Baza2() {std::cout << "Baza2 " ;}; Baza2() {std::cout << "Baza2 " ;}};
+class  Baza3 									{ public: ~Baza3() {std::cout << "Baza3 " ;}; Baza2() {std::cout << "Baza3 " ;}};
+class X: public Baza1, public Baza2 			{ public: ~X() {std::cout << "X " ;}; Baza2() {std::cout << "X " ;}};
+class Y: private Baza3, public X, public Baza1 	{ public: ~Y() {std::cout << "Y " ;}; Baza2() {std::cout << "Y" ;}};
 
 
 int main()
