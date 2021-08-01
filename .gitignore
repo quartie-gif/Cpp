@@ -2,3 +2,5 @@
 *.o
 makefile
 test
+*.dSYM
+main
