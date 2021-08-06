@@ -12,11 +12,16 @@ int main(int argc, char const *argv[])
 	---------------- TESTING SMART POINTERS ----------------
 	*/
 
+
+	/*
+	---------------- TESTING UNIQUE POINTER ----------------
+	*/
+
 	std::cout << std::endl;
 
 	MyInt* myInt15 = new MyInt(15);
 	std::unique_ptr<MyInt> uniquePtr1(myInt15);
-	std::unique_ptr<MyInt> uniquePtr15(myInt15);
+	// std::unique_ptr<MyInt> uniquePtr15(myInt15);
 
 	std::cout << "uniquePtr1.get(): " << uniquePtr1.get() << std::endl;
 
@@ -27,9 +32,13 @@ int main(int argc, char const *argv[])
 	std::cout << std::endl;
 
 
+	std::cout << "Before local scope" << std::endl; 
+
 	{
 	  std::unique_ptr<MyInt> localPtr{new MyInt(2003)};
 	}
+
+	std::cout << "After local scope" << std::endl; 
 
 	std::cout << std::endl;
 
@@ -37,7 +46,7 @@ int main(int argc, char const *argv[])
 	MyInt* myInt= uniquePtr2.release();
 	delete myInt;
 
-	std::cout << std::endl;
+	// std::cout << std::endl;
 
 
 	/*
@@ -45,6 +54,9 @@ int main(int argc, char const *argv[])
 	*/
 
 	std::shared_ptr<int> sharedPtr1(new int{11}, IntDeleter());
+
+	std::cout << "Before local scope" << std::endl; 
+
 
 	//Define a local scope
 	{
