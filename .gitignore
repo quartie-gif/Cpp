@@ -5,3 +5,4 @@ makefile
 test
 *.dSYM
 main
+.vscode
