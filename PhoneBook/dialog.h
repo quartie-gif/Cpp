@@ -21,10 +21,12 @@ public:
     explicit Dialog(QWidget *parent = nullptr);
     ~Dialog();
      void updateFile() const;
+     void sendData(QString data);
+
 private slots:
      void on_Add_pushButton_clicked();
 
-     void on_exit_pushButton_clicked();
+
 
 private:
     Ui::Dialog *ui;

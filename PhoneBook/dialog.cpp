@@ -1,5 +1,7 @@
 #include "dialog.h"
 #include "ui_dialog.h"
+#include "menu.h"
+#include <QObject>
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
@@ -66,7 +68,12 @@ void Dialog::on_Add_pushButton_clicked()
     }
 
     if (noErrors)
+    {
         m_persons.push_back(Person(ui->Name_lineEdit->text(), ui->Surname_lineEdit->text(), ui->Phone_lineEdit->text(), ui->Nationality_comboBox->currentText(), isWoman));
+        Menu menu;
+        QObject::connect(this , SIGNAL(sendData(QString)), &menu , SLOT(getData(QString)));
+        emit("DUPA");
+    }
 
 
 }
@@ -86,8 +93,9 @@ void Dialog::updateFile() const
     }
 }
 
-void Dialog::on_exit_pushButton_clicked()
+
+void Dialog::sendData(QString data)
 {
-    this->close();
+
 }
 

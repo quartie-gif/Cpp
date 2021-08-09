@@ -1,7 +1,8 @@
 #include "gui.h"
 #include "ui_gui.h"
+#include "menu.h"
 #include <QDebug>
-#include <QLocale>
+#include <QMessageBox>
 
 
 GUI::GUI(QWidget *parent)
@@ -17,8 +18,23 @@ GUI::~GUI()
 }
 
 
-void GUI::on_Add_pushButton_clicked()
+void GUI::on_login_pushButton_clicked()
 {
+    QString username = ui->username_lineEdit->text();
+    QString password = ui->password_lineEdit->text();
 
+    if (username == QString("test")  && password == QString("test"))
+    {
+        QMessageBox::information(this, "Login", "Username and password is correct!");
+        Menu menu;
+        menu.setModal(true);
+        menu.exec();
+    }
+    else
+    {
+        QMessageBox::information(this, "Login", "Username and password is incorrect!");
+    }
 }
+
+
 

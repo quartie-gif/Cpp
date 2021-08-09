@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QMainWindow>
-#include "PersonData.h"
 #include <vector>
 
 QT_BEGIN_NAMESPACE
@@ -17,9 +16,9 @@ public:
     ~GUI();
 
 private slots:
-    void on_Add_pushButton_clicked();
+
+    void on_login_pushButton_clicked();
 
 private:
     Ui::GUI *ui;
-    std::vector<Person> m_person;
 };
