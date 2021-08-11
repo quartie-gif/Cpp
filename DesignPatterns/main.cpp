@@ -45,6 +45,11 @@ int main(int argc, char const *argv[])
         delete adapter;
 
     }
-
+    
+    {
+        std::cout << "------------------------ STRATEGY ------------------------" << std::endl;
+        ClientCodeStrategy();
+    }
+    
     return 0;
 }
