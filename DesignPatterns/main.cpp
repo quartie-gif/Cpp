@@ -50,6 +50,11 @@ int main(int argc, char const *argv[])
         std::cout << "------------------------ STRATEGY ------------------------" << std::endl;
         ClientCodeStrategy();
     }
+
+    {
+        std::cout << "------------------------ OBSERVER ------------------------" << std::endl;
+        ClientCodeObserver();
+    }
     
     return 0;
 }
