@@ -1,76 +1,58 @@
-/* 
-   Celem zadania jest napisanie pomocniczej klasy DoUndo, ktora pozwala 
-   na odwolanie operacji.
 
-   Jak to jest robione powinno byc ewidentne po przeczytaniu zawartosci klasy Msg.
-
-   UWAGA: Prosze zauwazyc ze w trFail ostania funkcja statyczna
-   DoUndo::allok() nie jest wywolywana, jest to f. statyczna!  
-
-   UWAGA: KeepInt musi przechowac zarowno wartosc poczatkow jak i
-   referencje do miejsca gdzie mozna odlozyc te wartosc jesli undo jest wolane.   
- */
-#include <iostream>
-#include <stdexcept>
-#include "DoUndo.h"
+/*----------------------------------------------------------------
+W zadaniu malezy zaimplementowac przetwarzanie liczb typu double (upakowanych w klase Argumenty znana z poprzedniego zadania).
+Sekwencja przetwarzania (kolejne kroki) sa tworzone dynamicznie (w czasie wykonania programu)!
+W implementacji, jesli ktos umie, moze uzyc std::vector, 
+   w przeciwnym razie mozna zalozyc jakis maksymalny rozmiar w klasach Argumenty i w SekwencjaAlgorytmow.
+Mozna tez zrobic list polaczona algoorytmow.
+UWAGA: Prosze sie bacznie przygladnac argumentom przyjmowanym przez metode SekwencjaAlgorytmow::add, 
+       czy mozemy znalezc dla nich "wspolny mianownik"?   
+UWAGA: Standard, poprawnosc const.
+*/
 
 
-class Msg : public DoUndoAction {
-  void dodo() {
-    std::cout << "Entering transaction" << std::endl;
-  }    
-  void undoOk() {
-    std::cout << "Finished transaction" << std::endl;
-  }
-  void undoFail() {
-    std::cout << "Broken transaction" << std::endl;
-  }
-  
+#include "Argumenty.h"
+#include "SekwencjaAlgorytmow.h"
+#include "Algs.h"
+
+
+struct Printer{
+    Printer(const char* prefix) : m_prefix{prefix} {}
+    Argumenty operator()(const Argumenty& arg) const {
+        std::cout << m_prefix << arg << std::endl;
+        return arg;
+    }
+    const char* m_prefix;
 };
 
-int konto1 = 100;
-int konto2 = 20;
-
-void trOK() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 11;
-  DoUndo k1(new KeepInt(konto1)); // trick w tym zadaniu jest tutaj, musimy przechowac referencje do int: konto1 aby, moc potencjalnie zmienic jego wartosc gdy transakcja si enie powiedzie
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  konto2 += wartoscPrzelewu;
-  DoUndo::allok();
-}
-
-
-void trFail() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 14;
-  DoUndo k1(new KeepInt(konto1));
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  throw std::runtime_error("Tranzakcja przerwana z nieznanej przyczyny");
-  konto2 += wartoscPrzelewu;  
-  DoUndo::allok();
-}
-
-
 int main() {
-  try {
-    trOK();
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-    trFail();
-  } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-  }
-  
+    SekwencjaAlgorytmow kwadratNajmniejszej;
+    kwadratNajmniejszej.add( Printer("Wejscie ") );
+    kwadratNajmniejszej.add(minimum);
+    kwadratNajmniejszej.add([](const Argumenty& a){ std::cout << "1 " << a << std::endl; return a;});
+    kwadratNajmniejszej.add([](const Argumenty& a){ return Argumenty::pojedynczy(a[0]*a[0]); });
+    // // w domu prosze dodac sobie funkcjonalnosc usunieca, ktoregos kroku, i dodania kroku miedzy dwoma innymi
+    // // prosze dodac mozliwosc opuszenia kolejnych krokow obliczen
+
+    Argumenty a(3);
+    a(0, 4)(1, -2)(2, 6);
+    const Argumenty a2(a); // upewniam sie czy jest to kopiowalny obiekt, w domu prosze dodac mozliwosc przesuwania
+
+    auto wynik = kwadratNajmniejszej.procesuj(a2);
+    std::cout <<  "Wynik " << wynik << std::endl;
+
+    const Argumenty a3(a2);
+    SekwencjaAlgorytmow kwadratSumy;
+    kwadratSumy.add(sum);
+    kwadratSumy.add(sq);
+
+    wynik = kwadratSumy.procesuj(a3);
+    std::cout << "Wynik " << wynik << std::endl;
+
 }
 /* wynik
-Entering transaction
-Finished transaction
-konto1 89 konto2 31
-Entering transaction
-Broken transaction
-Tranzakcja przerwana z nieznanej przyczyny
-konto1 89 konto2 31
- */
+Wejscie 4 -2 6
+1 -2
+Wynik 4
+Wynik 2.82843
+*/
