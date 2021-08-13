@@ -32,21 +32,21 @@ int main() {
     m += " there?";
     std::cout << "size " << m.size() << " " << m.fragments() <<  " " << m << std::endl;
 
-    // MyString mm(std::move(m));
-    // std::cout << "m (after move) size " << m.size() <<  " " << m << std::endl;
-    // std::cout << "mm size " << mm.size() << " " << mm.fragments() <<  " " << mm << std::endl;
+    MyString mm(std::move(m));
+    std::cout << "m (after move) size " << m.size() <<  " " << m << std::endl;
+    std::cout << "mm size " << mm.size() << " " << mm.fragments() <<  " " << mm << std::endl;
 
-    // MyString n("Again. ");
-    // n += std::move(mm);
-    // std::cout << "n: " << n << std::endl;
+    MyString n("Again. ");
+    n += std::move(mm);
+    std::cout << "n: " << n << std::endl;
 
-    // MyString k;
-    // k = std::move(n);
-    // std::cout << "n (after move): " << n << std::endl;
-    // std::cout << "k: " << k << std::endl;
-    // const MyString kk(std::move(k));
-    // std::cout << "kk: " << kk.size() << " " << kk.fragments() << std::endl;
-    // std::cout << kk.fragment(2).str() << std::endl;
+    MyString k;
+    k = std::move(n);
+    std::cout << "n (after move): " << n << std::endl;
+    std::cout << "k: " << k << std::endl;
+    const MyString kk(std::move(k));
+    std::cout << "kk: " << kk.size() << " " << kk.fragments() << std::endl;
+    std::cout << kk.fragment(2).str() << std::endl;
 }
 /* wynik
 size 29 4 Hello World! Is anyone there?
