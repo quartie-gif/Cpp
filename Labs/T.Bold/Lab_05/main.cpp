@@ -1,76 +1,60 @@
-/* 
-   Celem zadania jest napisanie pomocniczej klasy DoUndo, ktora pozwala 
-   na odwolanie operacji.
-
-   Jak to jest robione powinno byc ewidentne po przeczytaniu zawartosci klasy Msg.
-
-   UWAGA: Prosze zauwazyc ze w trFail ostania funkcja statyczna
-   DoUndo::allok() nie jest wywolywana, jest to f. statyczna!  
-
-   UWAGA: KeepInt musi przechowac zarowno wartosc poczatkow jak i
-   referencje do miejsca gdzie mozna odlozyc te wartosc jesli undo jest wolane.   
+/**
+ * Celem zadania jest napisanie plimorficznej tablicy/
+ * W tablicy tym trzymac bedziemy wskazniki do obiektow pewnej hierarchii klas.
+ * Trudnoscia w zadaniu jest znalezienie hierarchii klas i zapewnienie jej kopiowalnosci.
+ * 
+ * zagadnienia: dziedziczenie, kopiowalnosc, operatory
+ * 
+ * UWAGA w operatorze przypisania = konieczne jest zrobienie kopii obiektow zlozonych w tablicy
+ * UWAGA implementacj tablicy wskaznikow w PArr musi byc dynamiczna, nie mozemy zlalozyc ze gorny limit na ilosc elementow np. 10
+ * UWAGA w klasie StringWrapper nie mozna uzyc std::string
+ * Kompilowac z flagami -Wall -g
  */
+
 #include <iostream>
-#include <stdexcept>
-#include "DoUndo.h"
+#include <string>
+#include "PArr.h"
+#include "FloatWrapper.h"
+#include "IntWrapper.h"
+#include "StringWrapper.h"
+
+/// TODO: RROR SUMMARY: 4 errors from 3 contexts (suppressed: 0 from 0)
+
+int main() {  
+  PArr a(3); // 3 elementowa
+  a[0] = new FloatWrapper(0.1);
+  char carr[80];
+  strcpy(carr, "nothing");
+  a[1] = new StringWrapper(carr); // nie mozna przechowac wskaznika, trzeba skopiowac zawartosc do pamieci
+  bzero(carr, sizeof(carr));
+  a[2] = new IntWrapper(-1);
+  std::cout << a << std::endl;
+  {
+    PArr b(4); // 4 elementowa
+    b[0] = new FloatWrapper(11.2);
+    b[1] = new StringWrapper("hello");
+    b[2] = new IntWrapper(-76);
+    b[3] = new StringWrapper("world");
+    
+    std::cout << " przed przepisaniem " << b << std::endl;  
+    a = b;
+    std::cout << " po przepisaniu     " << b << std::endl;  
+  }
+  std::cout << (const PArr&)a << std::endl;			 
+
+  PArr c(std::move(a));
+  std::cout << "a " <<  (const PArr&)a << std::endl;			 
+  std::cout << "c " << (const PArr&)c << std::endl;			 
 
 
-class Msg : public DoUndoAction {
-  void dodo() {
-    std::cout << "Entering transaction" << std::endl;
-  }    
-  void undoOk() {
-    std::cout << "Finished transaction" << std::endl;
-  }
-  void undoFail() {
-    std::cout << "Broken transaction" << std::endl;
-  }
   
-};
-
-int konto1 = 100;
-int konto2 = 20;
-
-void trOK() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 11;
-  DoUndo k1(new KeepInt(konto1)); // trick w tym zadaniu jest tutaj, musimy przechowac referencje do int: konto1 aby, moc potencjalnie zmienic jego wartosc gdy transakcja si enie powiedzie
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  konto2 += wartoscPrzelewu;
-  DoUndo::allok();
-}
-
-
-void trFail() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 14;
-  DoUndo k1(new KeepInt(konto1));
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  throw std::runtime_error("Tranzakcja przerwana z nieznanej przyczyny");
-  konto2 += wartoscPrzelewu;  
-  DoUndo::allok();
-}
-
-
-int main() {
-  try {
-    trOK();
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-    trFail();
-  } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-  }
-  
+  // UWAGA na potencjalny wyciek pamieci
 }
 /* wynik
-Entering transaction
-Finished transaction
-konto1 89 konto2 31
-Entering transaction
-Broken transaction
-Tranzakcja przerwana z nieznanej przyczyny
-konto1 89 konto2 31
- */
+0.1 nothing -1
+ przed przepisaniem 11.2 hello -76 world
+ po przepisaniu     11.2 hello -76 world
+11.2 hello -76 world
+a
+c 11.2 hello -76 world
+*/
