@@ -1,76 +1,87 @@
-/* 
-   Celem zadania jest napisanie pomocniczej klasy DoUndo, ktora pozwala 
-   na odwolanie operacji.
-
-   Jak to jest robione powinno byc ewidentne po przeczytaniu zawartosci klasy Msg.
-
-   UWAGA: Prosze zauwazyc ze w trFail ostania funkcja statyczna
-   DoUndo::allok() nie jest wywolywana, jest to f. statyczna!  
-
-   UWAGA: KeepInt musi przechowac zarowno wartosc poczatkow jak i
-   referencje do miejsca gdzie mozna odlozyc te wartosc jesli undo jest wolane.   
+/*
+ Celem zadania jest obsluzenie sytuacji, w ktorej mamy wiele klas, w ktorych zmieniaja sie dane (Obserwowani) i wiele klas, w ktorych te dane chcemy monitorowac (Obserwatorzy).
+  W zadaniu podano przyklady klas obserowanych natomiast klas(a/y) bazowe sa do na pisania. 
+  Do napisania jest takze hierachia klas obserwatorow.
+  
+  UWAGA: W pzypadku, gdy dwie hierarchie klas musza ze soba wspolpracowac 
+  programujemy te interakcje z uzyciem metod klas bazowych 
+  (najczesciej czysto abstrakcyjnych).
+  UWAGA: W zadaniu nie trzeba kopiowac klas obserwatorow. 
  */
+
 #include <iostream>
-#include <stdexcept>
-#include "DoUndo.h"
+#include "Obserwowany.h"
+#include "Obserwator.h"
 
-
-class Msg : public DoUndoAction {
-  void dodo() {
-    std::cout << "Entering transaction" << std::endl;
-  }    
-  void undoOk() {
-    std::cout << "Finished transaction" << std::endl;
-  }
-  void undoFail() {
-    std::cout << "Broken transaction" << std::endl;
+class DaneOdUsera : public Obserwowany {
+public:
+  DaneOdUsera()
+    : m_licznik(0) {}
+  
+  void odczytaj( int x) {
+    m_dane[m_licznik] = x;
+    ++m_licznik;
+    noweDaneNadeszly(x);
   }
   
+private:
+  int m_dane[10];
+  int m_licznik;  
 };
 
-int konto1 = 100;
-int konto2 = 20;
-
-void trOK() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 11;
-  DoUndo k1(new KeepInt(konto1)); // trick w tym zadaniu jest tutaj, musimy przechowac referencje do int: konto1 aby, moc potencjalnie zmienic jego wartosc gdy transakcja si enie powiedzie
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  konto2 += wartoscPrzelewu;
-  DoUndo::allok();
-}
-
-
-void trFail() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 14;
-  DoUndo k1(new KeepInt(konto1));
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  throw std::runtime_error("Tranzakcja przerwana z nieznanej przyczyny");
-  konto2 += wartoscPrzelewu;  
-  DoUndo::allok();
-}
+class Generator : public Obserwowany {
+public:
+  Generator(int init)
+    : m_c(init) {}
+  int nastepna() {  
+    noweDaneNadeszly(m_c);
+    m_c++;
+    return m_c - 1;
+  }
+private:
+  int m_c;
+};
 
 
 int main() {
-  try {
-    trOK();
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-    trFail();
-  } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-  }
+
+  ObserwatorLicznik ol1;
+  ObserwatorLicznik ol2;
+  ObserwatorWypisywacz ow;
+
+  DaneOdUsera du;
+  du.odczytaj(9);
+  du.dodajObserwatora( &ol1 );
+  du.dodajObserwatora( &ow );
+  du.odczytaj(2018);
+  du.odczytaj(9);
+  du.odczytaj(1);
+  
+  std::cout << "\ng1\n";
+  Generator g1(0);
+  g1.dodajObserwatora( &ol2 );
+  g1.dodajObserwatora( &ow );  
+  
+
+  g1.nastepna();
+  g1.nastepna();
+  g1.nastepna();
+  g1.nastepna();
+  g1.nastepna();
+  std::cout << "\ng2\n";
+  Generator g2(100);
+  du.dodajObserwatora( &ow );
+    
+  
+  std::cout << g2.nastepna() << " " << g2.nastepna() << std::endl;
+  std::cout << "sumy " << ol1.suma() << " " << ol2.suma() << std::endl;
   
 }
 /* wynik
-Entering transaction
-Finished transaction
-konto1 89 konto2 31
-Entering transaction
-Broken transaction
-Tranzakcja przerwana z nieznanej przyczyny
-konto1 89 konto2 31
+ 2018 9 1
+g1
+ 0 1 2 3 4
+g2
+100 101
+sumy 2028 10
  */
