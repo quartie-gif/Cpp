@@ -1,76 +1,89 @@
-/* 
-   Celem zadania jest napisanie pomocniczej klasy DoUndo, ktora pozwala 
-   na odwolanie operacji.
-
-   Jak to jest robione powinno byc ewidentne po przeczytaniu zawartosci klasy Msg.
-
-   UWAGA: Prosze zauwazyc ze w trFail ostania funkcja statyczna
-   DoUndo::allok() nie jest wywolywana, jest to f. statyczna!  
-
-   UWAGA: KeepInt musi przechowac zarowno wartosc poczatkow jak i
-   referencje do miejsca gdzie mozna odlozyc te wartosc jesli undo jest wolane.   
+/*
+ * Celem zadania jest napisanie hierarchi klas opisujacej skladniki systemu plikow.
+ * Skladnikami tymi sa miedzy innymi katalog (klasa Dir) i plik (klasa File). 
+ * Jaka jest hierarchia? Czy wystepuja w niej tylko te dwie klasy?
+ * Nalezy przewidziec ze beda to jeszcze jakies inne obiekty. Np. Link?
+ * Prosze uniemozliwic dziedziczenie po klasie Dir, bez tego (-2pkt).
+ * Prosze napisaca w dokumentacji jak i dlaczego nie bedzie mozna po klasie Dir dziedziczyc.
+ *
+ *
+ * UWAGA: Aby zapewnic ladne wypisywanie, klasy te powinny psiadac metode print z argumentem informujacym 
+ *        ile spacji potrzeba wypisac przed nazwa (indentacja). operator<< powinien wywolac te metode dla Dir a ona rekursywnie metody print dla skladowych zwiekszajac liczbe spacji.
+ * UWAGA: W rozwiazaniu nalezy uzyc dynamicznego rozpoznania typow (wazne, upraszcza implementacje nieco!)
+ * UWAGA: Prosze zauwazyc ze Dir zarzada pamiecia dla przechowywanych obiektow. To znaczy musi jes skasowac. 
+ *        W implementcji mozna uzyc czego sie chce. Jak ktos umie std::vector to b. prosze. 
+ *        Moze byc takze tablica na 10 elementow lub PArr z poprzedniego zadania. 
+ * UWAGA: W implementacji klasy Dir nie mozna uzyc dwoch "tablic" jedna na pliki a druga na katalogi bo jest to 
+ *        a) nierozszerzalne b) nie da sie zachowac kolejnosci dodawania do katalogu.
  */
-#include <iostream>
-#include <stdexcept>
-#include "DoUndo.h"
 
-
-class Msg : public DoUndoAction {
-  void dodo() {
-    std::cout << "Entering transaction" << std::endl;
-  }    
-  void undoOk() {
-    std::cout << "Finished transaction" << std::endl;
-  }
-  void undoFail() {
-    std::cout << "Broken transaction" << std::endl;
-  }
-  
-};
-
-int konto1 = 100;
-int konto2 = 20;
-
-void trOK() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 11;
-  DoUndo k1(new KeepInt(konto1)); // trick w tym zadaniu jest tutaj, musimy przechowac referencje do int: konto1 aby, moc potencjalnie zmienic jego wartosc gdy transakcja si enie powiedzie
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  konto2 += wartoscPrzelewu;
-  DoUndo::allok();
-}
-
-
-void trFail() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 14;
-  DoUndo k1(new KeepInt(konto1));
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  throw std::runtime_error("Tranzakcja przerwana z nieznanej przyczyny");
-  konto2 += wartoscPrzelewu;  
-  DoUndo::allok();
-}
+#include "Dir.h"
+#include "File.h"
 
 
 int main() {
-  try {
-    trOK();
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-    trFail();
-  } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-  }
+
+  Dir* top = new Dir(".");
+  Dir* home = new Dir("home");
+  *top += home; // dodajemy do kat TOP podkatalog
+  *home += new Dir("ewa");
+  *home += new File("proj.descr");
+  *home += new File("proj.files.repo");
+  *home += new Dir("adam");
   
+  std::cout << (const Dir&)*top << std::endl;
+
+  top->findDir("ewa")->add( new Dir("Desk") );
+
+  Dir* ewa = home->findDir("ewa");  
+  *ewa += new File("auto1.jpg");
+  *ewa += new File("auto2.jpg");
+  *ewa += new File("auto3.jpg");
+  top->findDir("ewa")->add( new Dir("work") );
+
+
+  std::cout << *top;
+  // std::cout << "--------------" << std::endl;
+  // std::cout << *(ewa->get("work"));
+  // std::cout << *(top->get("proj.descr"));
+
+  delete top;
 }
-/* wynik
-Entering transaction
-Finished transaction
-konto1 89 konto2 31
-Entering transaction
-Broken transaction
-Tranzakcja przerwana z nieznanej przyczyny
-konto1 89 konto2 31
+/* wynik 
+. (DIR)
+  home (DIR)
+    ewa (DIR)
+    proj.descr (FILE)
+    proj.files.repo (FILE)
+    adam (DIR)
+. (DIR)
+  home (DIR)
+    ewa (DIR)
+      Desk (DIR)
+      auto1.jpg (FILE)
+      auto2.jpg (FILE)
+      auto3.jpg (FILE)
+      work (DIR)
+    proj.descr (FILE)
+    proj.files.repo (FILE)
+    adam (DIR)
+--------------
+work (DIR)
+proj.descr (FILE)
+Deleting Dir: .
+About to delete home
+Deleting Dir: home
+About to delete ewa
+Deleting Dir: ewa
+About to delete Desk
+Deleting Dir: Desk
+About to delete auto1.jpg
+About to delete auto2.jpg
+About to delete auto3.jpg
+About to delete work
+Deleting Dir: work
+About to delete proj.descr
+About to delete proj.files.repo
+About to delete adam
+Deleting Dir: adam
  */
