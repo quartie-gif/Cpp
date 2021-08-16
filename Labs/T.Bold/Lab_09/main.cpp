@@ -1,76 +1,49 @@
-/* 
-   Celem zadania jest napisanie pomocniczej klasy DoUndo, ktora pozwala 
-   na odwolanie operacji.
-
-   Jak to jest robione powinno byc ewidentne po przeczytaniu zawartosci klasy Msg.
-
-   UWAGA: Prosze zauwazyc ze w trFail ostania funkcja statyczna
-   DoUndo::allok() nie jest wywolywana, jest to f. statyczna!  
-
-   UWAGA: KeepInt musi przechowac zarowno wartosc poczatkow jak i
-   referencje do miejsca gdzie mozna odlozyc te wartosc jesli undo jest wolane.   
- */
+/*
+Celem zadania jest napisanie szablonu listy polaczonej.
+Ma to byc najprostsza lista, to znaczy polaczona jednokierunkowo.
+Z roznych operacji, ktore oferuje lista potrzebne sa tylko:
+add - dodajaca na koniec
+contains - sprawdzajaca czy element o zadanej wartosci jest w liscie
++ operacje kopiowania i przesuwania listyi destruktor
+Polecam do zrobienia w domu (znaczy ze moze bedzie na kolejnych laborkach):
+dodanie operacji pop (zwracjacej ostatni element i usuwajacy go z listy)
+dodanie operacji contains z predykatem. np l1.contains( [](int x){ return x > 5; } )
+dodanie operacji collect z predykatem . l1.collect( [](int x){ return x > 5; } ) // zwraca liste z elemetnami wiekszymi niz 5
+dodanie przesuwajacego operator przypisania
+UWAGA: prosze pamietac o porawnosci const (przyklad jej nie wymusza ala ja sprawdze)
+UWAGA: kod metod moze sie znajdowac w ciele klasy (prosze sobie w domu przepisac rozwiazanie take zeby metody byly poza klasa)
+*/
+#include <string>
+#include <utility>
 #include <iostream>
-#include <stdexcept>
-#include "DoUndo.h"
 
-
-class Msg : public DoUndoAction {
-  void dodo() {
-    std::cout << "Entering transaction" << std::endl;
-  }    
-  void undoOk() {
-    std::cout << "Finished transaction" << std::endl;
-  }
-  void undoFail() {
-    std::cout << "Broken transaction" << std::endl;
-  }
-  
-};
-
-int konto1 = 100;
-int konto2 = 20;
-
-void trOK() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 11;
-  DoUndo k1(new KeepInt(konto1)); // trick w tym zadaniu jest tutaj, musimy przechowac referencje do int: konto1 aby, moc potencjalnie zmienic jego wartosc gdy transakcja si enie powiedzie
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  konto2 += wartoscPrzelewu;
-  DoUndo::allok();
-}
-
-
-void trFail() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 14;
-  DoUndo k1(new KeepInt(konto1));
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  throw std::runtime_error("Tranzakcja przerwana z nieznanej przyczyny");
-  konto2 += wartoscPrzelewu;  
-  DoUndo::allok();
-}
-
-
+#include "List.h"
 int main() {
-  try {
-    trOK();
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-    trFail();
-  } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-  }
-  
+    List<int> l1;
+    l1.add(1).add(6).add(6).add(11).add(7);
+    std::cout << "orginal " << l1 << std::endl;
+    List<int> l2 = l1;
+    std::cout << "kopia " << l2 << std::endl;
+
+    List<int> l3(std::move(l1));
+    std::cout << "orginal po przesunieciu "<< l1 << std::endl;
+    std::cout << "w nowym miejscu "<< l3 << std::endl;
+    std::cout << "Jest 7? " << l3.contains(7) << " A jest 6? "<<l3.contains(6) << std::endl;
+
+
+    List<std::string> s;
+    s.add("Hello").add("darkness").add("my").add("old").add("friend");
+    std::cout << s << std::endl;
+
 }
 /* wynik
-Entering transaction
-Finished transaction
-konto1 89 konto2 31
-Entering transaction
-Broken transaction
-Tranzakcja przerwana z nieznanej przyczyny
-konto1 89 konto2 31
- */
+orginal 1 6 6 11 7
+kopia 1 6 6 11 7
+orginal po przesunieciu
+w nowym miejscu 1 6 6 11 7
+Jest 7? 0 A jest 6? 1
+Hello darkness my old friend
+*/
+
+
+
