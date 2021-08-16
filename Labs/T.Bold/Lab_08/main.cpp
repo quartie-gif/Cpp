@@ -1,76 +1,78 @@
-/* 
-   Celem zadania jest napisanie pomocniczej klasy DoUndo, ktora pozwala 
-   na odwolanie operacji.
-
-   Jak to jest robione powinno byc ewidentne po przeczytaniu zawartosci klasy Msg.
-
-   UWAGA: Prosze zauwazyc ze w trFail ostania funkcja statyczna
-   DoUndo::allok() nie jest wywolywana, jest to f. statyczna!  
-
-   UWAGA: KeepInt musi przechowac zarowno wartosc poczatkow jak i
-   referencje do miejsca gdzie mozna odlozyc te wartosc jesli undo jest wolane.   
- */
-#include <iostream>
-#include <stdexcept>
-#include "DoUndo.h"
-
-
-class Msg : public DoUndoAction {
-  void dodo() {
-    std::cout << "Entering transaction" << std::endl;
-  }    
-  void undoOk() {
-    std::cout << "Finished transaction" << std::endl;
-  }
-  void undoFail() {
-    std::cout << "Broken transaction" << std::endl;
-  }
-  
+/*
+W zadaniu będziemy definiowac i uzywac wymiennych "polityk"/zchowan do modyfikacji zlozonych zachowan klasy. 
+Mianowicie mamy polityke dotyczaca "cachowania" czyli zapamietywania wynikow posrednich: 
+Ta polityka definiowana jest poprzez nastepujace metody:
+struct CachePolicy : public Policy {
+    virtual void cacheValueForArgument( double arg, double val ) const = 0; // zapamietuje warosc obliczenia dla argumentu
+    virtual bool hasCacheFor( double arg ) const = 0;  // zwraca true jesli w cachu znajduje sie wartosc dla argumentu
+    virtual double getCached(double arg) const = 0; // zapamietana wartosc dla argumentu
 };
-
-int konto1 = 100;
-int konto2 = 20;
-
-void trOK() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 11;
-  DoUndo k1(new KeepInt(konto1)); // trick w tym zadaniu jest tutaj, musimy przechowac referencje do int: konto1 aby, moc potencjalnie zmienic jego wartosc gdy transakcja si enie powiedzie
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  konto2 += wartoscPrzelewu;
-  DoUndo::allok();
+Ta abstrakcyjna polityka posiada dwie implementacje: NoCache i OneCallCache.
+Pierwsza z nich niczego nie zapamietuje. Druga zapamietuje tylko jedna liczbe, z ostatniego wywolania.
+Druga polityka dotyczy tego czy przy obliczeniu cos ma byc wypisuwane na ekran.
+struct VerbosityPolicy : public Policy {
+    virtual void printArgAndResult( double arg, double val) const = 0; // wypisuje na stdout argument i wynik dzialania na tym argumencie
+};
+Dwie implementacje tej polityki to Silent i Verbose
+Takie polityki mozemy uzyc nastepujaco:
+typedef NoCache UsedCachePolicy;
+typedef Verbose UsedVerbosityPolicy;
+class X : public UsedCachePolicy, public UsedVerbosityPolicy {
+    void jakiesObliczenie(double arg) {
+        // uzywamy tutaj powyzszych polityk np.
+        double result = ..........
+        printArgAndResult(ar, result);
+        //....
+    }
 }
+W ten sposob mozemy latwo w calym programie zmienic zachowanie zmieniajac polityke w jednym miejscu. 
+T.j. redefinujac:
+typedef Silent UsedVerbosityPolicy;
+Aby to zadanie mialo sens na laboratorium umozliwany generacje wielu klas z roznymi wariantami polityk. 
+Sluzy na do tego makro MyCalculation generujace klase o zadaniej w ARG 1 nazwie i odpowiednimi klasami polityk zadanymi w ARG 2 i 3.
+UWAGA: Samo oblicznie w MyCalculation to:
+sqrt( pow(arg - 7, 2) );
+UWAGA: wielolinijkowe makrodefinicje piszemy tak (\ sluzy do kontynuacji w nowej linii):
+#define max(a, b, c) \
+        a = b; \
+        if ( b > a ) \
+        a = c;  
+UWAGA: Wszystkie niewirtualne polityki maja metode policyName zwracajaca nazwe (std::string lub const char*) polityki  
+*/
 
 
-void trFail() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 14;
-  DoUndo k1(new KeepInt(konto1));
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  throw std::runtime_error("Tranzakcja przerwana z nieznanej przyczyny");
-  konto2 += wartoscPrzelewu;  
-  DoUndo::allok();
-}
+#include <cmath>
+#include <iostream>
+
+#include "Policy.h"
+
+#include "MyCalculation.h" // tu znajduje sie makrodefinicja, ktora uzwyajac w.w. polityk moze generowac rozne klasy
 
 
 int main() {
-  try {
-    trOK();
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-    trFail();
-  } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-  }
-  
+    MyCalculation(Calc1, NoCache, Verbose) // tu generujemy klase Calc1
+    Calc1 c1; // twozymy obiekt wlasnie wygenerowanej klasy
+    c1.eval(5); // wywolujemy metode tej klasy
+
+    MyCalculation(Calc2, OneCallCache, Verbose) // tu generujemy klase Calc2
+    Calc2().eval(4); // tworzymy chwilowy obiekt i wywolujemy na nim metode
+    Calc2 c2;
+    c2.eval(9);
+    c2.eval(9); // tutaj obliczenie sie nie odbywa, wiec nic nie jest wypisane
+    c2.eval(7); // inny argument, wiec oblicznie sie odbywa
+    std::cout <<  static_cast<CachePolicy&>(c2).policyName() << " " << static_cast<VerbosityPolicy&>(c2).policyName() << std::endl;
+
+
+
+    MyCalculation(Calc3, OneCallCache, Silent) // tu generujemy klase Calc3
+    Calc3().eval(3); // brak wyniku na ekranie, polityka Silent
+    c2.eval(3);
 }
 /* wynik
-Entering transaction
-Finished transaction
-konto1 89 konto2 31
-Entering transaction
-Broken transaction
-Tranzakcja przerwana z nieznanej przyczyny
-konto1 89 konto2 31
- */
+f(5) = 2
+f(4) = 3
+f(9) = 2
+f(7) = 0
+OneCallCache Verbose
+f(3) = 4
+*/
