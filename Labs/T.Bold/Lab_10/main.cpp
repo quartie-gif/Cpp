@@ -1,76 +1,62 @@
-/* 
-   Celem zadania jest napisanie pomocniczej klasy DoUndo, ktora pozwala 
-   na odwolanie operacji.
-
-   Jak to jest robione powinno byc ewidentne po przeczytaniu zawartosci klasy Msg.
-
-   UWAGA: Prosze zauwazyc ze w trFail ostania funkcja statyczna
-   DoUndo::allok() nie jest wywolywana, jest to f. statyczna!  
-
-   UWAGA: KeepInt musi przechowac zarowno wartosc poczatkow jak i
-   referencje do miejsca gdzie mozna odlozyc te wartosc jesli undo jest wolane.   
+/* Celem zadania jest napisanie klasy fabryki pozwalajacej 
+   na konstrukcje/klonowanie obiektow dowolnego typu. 
+   Najpierw do fabryki wstrzykujemy metoda add() oryginal. 
+   Metoda clone() robi kopie z oryginalu.
+   UWAGA: Rozwiaznie z if/switch i typeid nie jest dopuszczalne. Mozna tylko uzyc dynamic_cast. 
+   UWAGA: Sama klasa ClonesF nie jest szablonem. Szablonami sa metody: add, clone i replace.
+   UWAGA: Kluczem w tym zadaniu jest przypomnienie sobie jaki zrobic 
+   kontener polimorficzny. Co musi on przechowywac?
+   UWAGA: Poza widocznymi klasami trzeba bedzie wymyslic dodatkowa hierarchie, 
+   ktora pozwoli na przechowanie oryginalow obiektow dowolnych klas.
  */
+
+
 #include <iostream>
-#include <stdexcept>
-#include "DoUndo.h"
+#include <string>
 
+#include "ClonesF.h"
 
-class Msg : public DoUndoAction {
-  void dodo() {
-    std::cout << "Entering transaction" << std::endl;
-  }    
-  void undoOk() {
-    std::cout << "Finished transaction" << std::endl;
-  }
-  void undoFail() {
-    std::cout << "Broken transaction" << std::endl;
-  }
-  
+// klasy testowe
+struct A{
+  A(const std::string& m) : msg( m ) {}
+  std::string msg;
 };
 
-int konto1 = 100;
-int konto2 = 20;
+struct B{
+  int x;
+};
 
-void trOK() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 11;
-  DoUndo k1(new KeepInt(konto1)); // trick w tym zadaniu jest tutaj, musimy przechowac referencje do int: konto1 aby, moc potencjalnie zmienic jego wartosc gdy transakcja si enie powiedzie
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  konto2 += wartoscPrzelewu;
-  DoUndo::allok();
-}
-
-
-void trFail() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 14;
-  DoUndo k1(new KeepInt(konto1));
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  throw std::runtime_error("Tranzakcja przerwana z nieznanej przyczyny");
-  konto2 += wartoscPrzelewu;  
-  DoUndo::allok();
-}
-
+struct C{
+  double v;
+};
 
 int main() {
-  try {
-    trOK();
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-    trFail();
-  } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-  }
-  
+  // tu mamy dwa obiekty, ktore sa w stanie produkowac nowe obiekty
+  ClonesF cf1;
+  A a("Obiekt a");
+  A a1("Obiekt a1");  
+  cf1.add(a);
+  B b;
+  b.x = 7;
+  cf1.add(b);
+  C c;
+  c.v = 3.87;
+  cf1.add(c);
+
+  ClonesF cf2;
+  cf2.add(a1);
+
+  std::cout << cf1.clone<A>().msg << std::endl;
+  std::cout << cf1.clone<B>().x << std::endl;
+  std::cout << cf2.clone<A>().msg << std::endl;
+  cf2.replace(A("Jeszcze cos innego"));
+  std::cout << cf2.clone<A>().msg << std::endl;
+
+
 }
 /* wynik
-Entering transaction
-Finished transaction
-konto1 89 konto2 31
-Entering transaction
-Broken transaction
-Tranzakcja przerwana z nieznanej przyczyny
-konto1 89 konto2 31
+Obiekt a
+7
+Obiekt a1
+Jeszcze cos innego
  */
