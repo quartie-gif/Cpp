@@ -1,76 +1,57 @@
-/* 
-   Celem zadania jest napisanie pomocniczej klasy DoUndo, ktora pozwala 
-   na odwolanie operacji.
-
-   Jak to jest robione powinno byc ewidentne po przeczytaniu zawartosci klasy Msg.
-
-   UWAGA: Prosze zauwazyc ze w trFail ostania funkcja statyczna
-   DoUndo::allok() nie jest wywolywana, jest to f. statyczna!  
-
-   UWAGA: KeepInt musi przechowac zarowno wartosc poczatkow jak i
-   referencje do miejsca gdzie mozna odlozyc te wartosc jesli undo jest wolane.   
+/* W zadaniu nalezy napisac szablon klasy Array ze specjalizacjami wartosci i dla wskaznikow.
+   Specjalizacja wplywa na kilka aspektow dzialna tego szablonu. 
+   W szczegolscnosci na to co robi   destruktor (czy kasuje obiekty, czy nie). 
+   Zmieniaja sie takze operator[] i operator <<.
+   Klasa X jest trywialnie prosta: przechowuje napis, dostarcza metody dostepowej, a podczas destrukcji wypisuje przechowywany napis.
+   Klasa Y dziedziczy po X i rozni sie tylko .
  */
+
 #include <iostream>
 #include <stdexcept>
-#include "DoUndo.h"
+#include "Array.h"
 
-
-class Msg : public DoUndoAction {
-  void dodo() {
-    std::cout << "Entering transaction" << std::endl;
-  }    
-  void undoOk() {
-    std::cout << "Finished transaction" << std::endl;
-  }
-  void undoFail() {
-    std::cout << "Broken transaction" << std::endl;
-  }
-  
-};
-
-int konto1 = 100;
-int konto2 = 20;
-
-void trOK() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 11;
-  DoUndo k1(new KeepInt(konto1)); // trick w tym zadaniu jest tutaj, musimy przechowac referencje do int: konto1 aby, moc potencjalnie zmienic jego wartosc gdy transakcja si enie powiedzie
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  konto2 += wartoscPrzelewu;
-  DoUndo::allok();
-}
-
-
-void trFail() {
-  DoUndo msg(new Msg());
-  const int wartoscPrzelewu = 14;
-  DoUndo k1(new KeepInt(konto1));
-  DoUndo k2(new KeepInt(konto2));
-  konto1 -= wartoscPrzelewu;
-  throw std::runtime_error("Tranzakcja przerwana z nieznanej przyczyny");
-  konto2 += wartoscPrzelewu;  
-  DoUndo::allok();
-}
+#include "X.h"
 
 
 int main() {
-  try {
-    trOK();
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
-    trFail();
-  } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
-    std::cout  << "konto1 " << konto1 << " konto2 " << konto2 << std::endl;
+  {
+    Array<7, int> iArray;
+    iArray[0] = 0;
+    iArray[1] = 8;
+    iArray[3] = 6;
+    std::cout << iArray << std::endl;
   }
-  
+
+  {
+    Array<4, X> xArray;
+    xArray[0] = X("a0");
+    xArray[2] = X("a2");
+    
+    std::cout << "Xarr: " << xArray << std::endl;
+  }
+  {
+    Array<5, X*> xPtrArray;
+
+    xPtrArray[0] = new X("obj 0 ");
+    xPtrArray[1] = new X("obj 1 ");
+    xPtrArray[2] = new X("obj 2 ");
+    xPtrArray[3] = new Y("obj Y 0 ");
+    std::cout <<  "XArr ptr: " << xPtrArray << std::endl;
+  }  
 }
 /* wynik
-Entering transaction
-Finished transaction
-konto1 89 konto2 31
-Entering transaction
-Broken transaction
-Tranzakcja przerwana z nieznanej przyczyny
-konto1 89 konto2 31
+0 8 0 6 0 0 0
+deleting X a0
+deleting X a2
+Xarr: a0  a2
+deleting X
+deleting X a2
+deleting X
+deleting X a0
+XArr ptr: obj 0  obj 1  obj 2  obj Y 0
+deleting X obj 0
+deleting X obj 1
+deleting X obj 2
+deleting Y obj Y 0
+deleting X obj Y 0
  */
