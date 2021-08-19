@@ -1,6 +1,11 @@
 #pragma once
 
 #include <QDialog>
+#include <QSqlQueryModel>
+#include <QTableView>
+#include <QSqlQuery>
+#include <QDebug>
+
 
 namespace Ui {
 class Menu;
@@ -25,7 +30,8 @@ private slots:
 
     void getData(QString person);
 
-private:
+public:
     Ui::Menu *ui;
+    QSqlDatabase m_db;
 };
 

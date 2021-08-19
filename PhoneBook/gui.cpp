@@ -10,6 +10,9 @@ GUI::GUI(QWidget *parent)
     , ui(new Ui::GUI)
 {
     ui->setupUi(this);
+
+
+
 }
 
 GUI::~GUI()
@@ -26,9 +29,15 @@ void GUI::on_login_pushButton_clicked()
     if (username == QString("test")  && password == QString("test"))
     {
         QMessageBox::information(this, "Login", "Username and password is correct!");
+
+
+
         Menu menu;
         menu.setModal(true);
         menu.exec();
+
+
+
     }
     else
     {

@@ -2,6 +2,9 @@
 
 #include <QMainWindow>
 #include <vector>
+#include <QtSql>
+#include <QSqlDatabase>
+#include <QFileInfo>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class GUI; }
@@ -21,4 +24,5 @@ private slots:
 
 private:
     Ui::GUI *ui;
+    QSqlDatabase m_db;
 };

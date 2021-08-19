@@ -67,35 +67,35 @@ void Dialog::on_Add_pushButton_clicked()
         noErrors = false;
     }
 
-    if (noErrors)
+    if(noErrors)
     {
-        m_persons.push_back(Person(ui->Name_lineEdit->text(), ui->Surname_lineEdit->text(), ui->Phone_lineEdit->text(), ui->Nationality_comboBox->currentText(), isWoman));
-        Menu menu;
-        QObject::connect(this , SIGNAL(sendData(QString)), &menu , SLOT(getData(QString)));
-        emit("DUPA");
-    }
+        db.open();
+        QSqlQueryModel *modal = new QSqlQueryModel();
+        QSqlQuery *query = new QSqlQuery(db);
+        query->prepare("select * from people");
+        query->exec();
+        modal->setQuery(*query);
 
+        query->prepare("INSERT INTO people (Name, Surname, Number, Sex) "
+                          "VALUES (:name, :surname, :number, :sex)");
+        query->bindValue(":name", ui->Name_lineEdit->text());
+        query->bindValue(":surname", ui->Surname_lineEdit->text());
+        query->bindValue(":number", ui->Phone_lineEdit->text());
+        query->bindValue(":se   x", !isWoman?"Male":"Woman");
+
+        query->exec();
+    }
 
 }
 
 void Dialog::updateFile() const
 {
-    QString filename="/Users/apple/GUI_Projects/PhonebookGUI/Data.txt";
-    QFile file( filename );
 
-    if ( file.open(QIODevice::ReadWrite) )
-    {
-        QTextStream stream( &file );
-        for(auto &it: m_persons)
-        {
-            stream << it.data();
-        }
-    }
 }
 
 
-void Dialog::sendData(QString data)
+void Dialog::getData(QSqlDatabase data)
 {
-
+    this->db = data;
 }
 
