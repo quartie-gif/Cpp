@@ -25,6 +25,7 @@ int main ()
   const ComplexNumber Z1 (1., 11);
   const ComplexNumber Z2 (2, 22.);
 
+
   ComplexNumber Z3 = static_cast<ComplexNumber>(3); //im=0
   #ifdef ERROR
     ComplexNumber Z3_ = 3.; 

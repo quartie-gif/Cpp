@@ -14,5 +14,5 @@ std::ostream & operator << (std::ostream &o, const box<T> & val)
 
 int main()
 {
-    std::cout << box<box<int>>() << std::endl;
+    std::cout << box<box<int> >() << std::endl;
 }
