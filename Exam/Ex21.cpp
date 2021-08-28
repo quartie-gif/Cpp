@@ -1,11 +1,12 @@
 #include<utility>
+#include<iostream>
 
 //UZUPEŁNIJ 1
 template< typename T>
 struct ptr{
   using value_type = T;
   explicit ptr(T* p):_p(p){}
-  ptr(ptr&& x): _p(std::__exchange(x._p, nullptr)){}
+  ptr(ptr&& x): _p(std::exchange(x._p, nullptr)){}
   ~ptr(){
     delete _p;
   }
@@ -14,7 +15,7 @@ struct ptr{
   }
   T operator*() const{
     return *_p;
-  }
+}
   T* operator->(){
     return _p;
   }
@@ -37,7 +38,7 @@ using Float_t = Type_t<>;
 
 // w main tam gdzie zakomentowane: //Po odkomentowaniu błąd kompilacji czy tam inny
 int main(){
-  using Type_ptr = ptr<std::pair<Float_t, Float_t>>;
+  using Type_ptr = ptr<std::pair<Float_t, Float_t> >;
 
   Type_ptr t1 { new Type_ptr::value_type{}};
   // Type_ptr t2 = t1; // po zrobieniu ptr(ptr&& x), ptr(ptr& x) jest domyślnie usuwany

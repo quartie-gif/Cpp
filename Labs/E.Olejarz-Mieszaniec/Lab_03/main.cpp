@@ -49,7 +49,7 @@ int main()
     mtab1+=tab2;
     std::cout << "next = " << mtab1.getNext() << std::endl;
     mtab1.getNext()[1]=100;
-    mtab1+=tab3;
+    tab2+=tab3;
     std::cout << "next = " << tab2.getNext() << std::endl;
     mtab1.print("Mtab1: ");
     MyArray mtab1Copy = mtab1;
