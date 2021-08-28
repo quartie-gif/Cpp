@@ -16,14 +16,17 @@ class MyArray
         //Destructor
         ~MyArray()
         {
-            delete [] _arr;  
+            delete [] _arr; 
+            _next = nullptr;
+            _arr = nullptr;
+            _size = 0; 
         }
 
 
         //Copy constructor
         MyArray(const MyArray & arr): _size(arr._size), _next(arr._next)
         {
-            if(_arr) delete [] _arr;
+            if(_arr != nullptr) delete [] _arr;
 
             _arr = new int[arr._size];
             for(unsigned i=0; i< arr._size; ++i)
@@ -54,14 +57,14 @@ class MyArray
         //Move constructor
         MyArray(MyArray && arr): _size(arr._size), _next(arr._next)
         {
-            if(_arr) delete [] _arr;
+            if(_arr != nullptr) delete [] _arr;
 
             _arr = new int[arr._size];
             for(unsigned i=0; i< arr._size; ++i)
             {
                 _arr[i] = arr._arr[i];
             }
-            // delete [] arr._arr;
+
             arr._size = 0;
             arr._next = nullptr;
         }
@@ -84,7 +87,6 @@ class MyArray
 
                 arr._size = 0;
                 arr._next = nullptr;
-                // delete [] arr._arr;
             }
             return *this;
         }
