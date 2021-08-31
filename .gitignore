@@ -6,3 +6,4 @@ test
 *.dSYM
 main
 .vscode
+*.exe
